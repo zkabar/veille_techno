@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veille Technologique - Transformers</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        nav {
+            background-color: #003366;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 20px;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .filter-buttons button {
+            margin: 5px;
+            padding: 8px 12px;
+            border: none;
+            background-color: #00509e;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .filter-buttons button:hover {
+            background-color: #003f7f;
+        }
+        .filter-buttons button.active-filter {
+            background-color: #001f3f;
+        }
+        #articles-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .article {
+            flex: 1 1 calc(33.33% - 20px);
+            box-sizing: border-box;
+            padding: 15px;
+            background-color: #f1f5f9;
+            border-left: 4px solid #0077cc;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .article h3 {
+            margin: 0 0 5px;
+        }
+        .article p {
+            font-size: 0.95em;
+        }
+        @media (max-width: 768px) {
+            .article {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function filterArticles(categorie) {
+            const articles = document.querySelectorAll('.article');
+            const buttons = document.querySelectorAll('.filter-buttons button');
+            buttons.forEach(btn => btn.classList.remove('active-filter'));
+
+            articles.forEach(article => {
+                if (categorie === 'Tous' || article.dataset.categorie === categorie) {
+                    article.style.display = 'block';
+                } else {
+                    article.style.display = 'none';
+                }
+            });
+
+            const activeBtn = Array.from(buttons).find(btn => btn.textContent === categorie);
+            if (activeBtn) {
+                activeBtn.classList.add('active-filter');
+            }
+        }
+    </script>
+</head>
+<body>
+    <nav>
+        <a href="#" onclick="showTab('etat')">État de l'art</a>
+        <a href="#" onclick="showTab('article')">Articles</a>
+        <a href="#" onclick="showTab('metho')">Méthodologie de veille</a>
+    </nav>
+
+    <div class="container">
+        <div id="etat" class="tab-content active">
+
+
+
+
+<h1>LLMs : Évolution et adaptation des Transformers aux séquences longues</h1>
+        
+        <h2>1. Introduction</h2>
+        <p>Le traitement automatique du langage naturel (NLP) a connu des avancées majeures au cours de la dernière décennie, notamment grâce à l'émergence des Large Language Models (LLMs). Ces modèles d'intelligence artificielle, basés principalement sur l'architecture Transformer, permettent d'analyser, de comprendre et de générer du texte avec une précision remarquable. Ils sont désormais omniprésents dans de nombreuses applications, allant des chatbots aux systèmes de traduction automatique en passant par la recherche documentaire et l'assistance à la rédaction.</p>
+
+        
+        <p>Ce rapport de veille technologique vise à explorer les récentes innovations permettant de surmonter les limites des Transformers classiques pour le traitement des longues séquences. Nous analyserons les modèles spécifiques conçus pour gérer de grands contextes, tels que BigBird, Longformer, etc. et nous examinerons leurs applications dans divers secteurs professionnels, notamment la médecine ou encore le droit.</p>
+
+<p>La suite du rapport abordera dans un premier temps le fonctionnement des Transformers, avant d'examiner leurs limites et les solutions innovantes qui permettent aujourd'hui d'étendre leur capacité à traiter des textes longs.</p>
+        
+        <h2>2. Que sont les Transformers ?</h2>
+        <h3>Des RNN aux Transformers</h3>
+        <p>Avant l'émergence des Transformers, les modèles de traitement du langage naturel étaient principalement basés sur les Réseaux de Neurones Récurrents (RNN) et leurs variantes, telles que les LSTM et les GRU. Ces architectures, bien que performantes pour des tâches séquentielles courtes, présentaient plusieurs limitations :
+
+Une incapacité à capturer efficacement des dépendances longues en raison de la disparition du gradient.
+
+Une exécution séquentielle, rendant l'entraînement et l'inférence peu efficaces en termes de parallélisme.
+
+L'introduction des Transformers par Vaswani et al. en 2017 avec l'article <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf">"Attention Is All You Need"</a> a révolutionné le domaine du NLP. Cette architecture repose sur un mécanisme de self-attention qui permet un traitement parallèle efficace et une meilleure modélisation des dépendances contextuelles. Voir <a href="https://huggingface.co/learn/nlp-course/fr/chapter1/4?fw=pt">ici</a> pour en savoir plus sur les transformers.</p>
+        
+
+<figure style="text-align: center;">
+  <img src="transformers.png" width="80%">
+  <figcaption><em>Figure :</em> Schéma explicatif simplifié de l’architecture Transformer.</figcaption>
+</figure>
+
+
+
+
+        <h3>Self-Attention</h3>
+        <p>Le self-attention est le cœur des Transformers. Il permet à chaque mot d'une séquence d'accorder une importance variable aux autres mots du texte, améliorant ainsi la compréhension du contexte global. Par exemple, prenons la phrase "Le chat mange une souris". Quand le modèle traite le mot "mange", il se demande à quels autres mots de la phrase ce mot est lié. Il analyse alors les autres mots ("Le", "chat", "une", "souris") et calcule combien ils sont importants pour comprendre "mange" dans ce contexte. Et c’est justement là qu’on touche au cœur du self-attention et à la manière dont le modèle comprend la sémantique des mots. 
+
+
+<h4>Q, K, V : les rouages de l’attention</h4>
+
+Quand on commence à traiter une phrase dans un Transformer, chaque mot est d’abord transformé en un vecteur (embedding) ou une suite de nombres qui encode sa signification dans le contexte du modèle. Puis, ces vecteurs ainsi que d'autres matrices apprises pendant l'entraînement servent de base pour calculer Q (query), K (key) et V (value) :
+
+<ul>
+
+<li><b>Les requêtes (Query)</b> : Représentent le mot analysé ou ce que chaque mot cherche à comprendre.</li>
+
+<li><b>Les clés (Key)</b> : Contiennent les informations des autres mots ou ce que chaque mot offre comme information.</li>
+
+<li><b>Les valeurs (Value)</b> : Contiennent les informations finales à extraire ou ce qu’on retient réellement de chaque mot.</li>
+
+</ul>
+
+
+
+<h4>Et donc, comment un mot sait qu’un autre est important ?</h4>
+
+C’est grâce à l’alignement entre Query et Key. Concrètement, le modèle calcule un produit scalaire entre le Q d’un mot et les K des autres. Ce produit scalaire mesure la similitude directionnelle : si les vecteurs pointent dans la même direction, le score est élevé :
+
+
+<div style="text-align: center;"><i>score<sub>i,j</sub> = Q<sub>i</sub>⋅K<sub>j</sub></i></div><br>
+
+
+Puis, ces scores sont normalisés par un softmax. Plus le score est élevé, plus le mot <i>j</i> est considéré comme important pour le mot <i>i</i>.
+Pour chaque mot, on compare sa Query avec les Keys de tous les autres mots et cela donne un score d’attention. Ces scores sont utilisés pour faire une moyenne pondérée des Values (V). Le mot "voit" les autres avec plus ou moins d’intensité selon leur importance. Chaque mot peut alors interagir avec tous les autres mots de la séquence, ce qui permet une meilleure représentation des relations sémantiques et syntaxiques. Ainsi, Le self-attention permet à chaque mot de "faire attention" aux autres mots de la phrase pour mieux comprendre son sens, en adaptant sa représentation en fonction du contexte global.
+
+<h3>Applications des Transformers</h3>
+
+<p>
+Depuis leur création, les Transformers ont révolutionné l’intelligence artificielle, bien au-delà du traitement du langage naturel. En plus d’alimenter des systèmes de traduction automatique comme Google Translate, ou des agents conversationnels tels que ChatGPT, ils sont désormais largement utilisés dans des domaines plus créatifs et visuels. 
+
+<br><br>
+Dans la génération d’images, des architectures hybrides combinent Transformers et GANs (Generative Adversarial Networks) pour créer des images réalistes, tandis que les cGANs (Conditional GANs) intègrent des mécanismes d’attention pour conditionner la génération sur des textes ou des attributs précis. Les Vision Transformers (ViT) exploitent l’attention pour remplacer les convolutions dans l’analyse d’images et de vidéos. 
+
+<br><br>
+Dans des modèles multimodaux comme DALL·E, ControlNet ou Imagen, les Transformers permettent d’associer finement texte et image, en capturant les relations complexes entre mots et pixels. On retrouve aussi leur usage dans la synthèse vocale, la génération de musique, ou la création de données synthétiques pour l'entraînement de modèles robustes. Toutefois, leur efficacité est remise en question lorsqu'ils sont appliqués à de très longues séquences, ce qui nous amène aux limites de cette architecture et aux solutions proposées.
+</p>
+        
+        <h2>3. Les Limites des Transformers pour le Traitement des Longues Séquences</h2>
+        <h3>Complexité Quadratique et Contraintes Matérielles</h3>
+        <p>L’un des principaux défis des Transformers classiques est leur complexité quadratique en fonction de la longueur de la séquence en <i>O(n²)</i>. Cela signifie que plus la séquence est longue, plus le coût computationnel devient élevé. Cette contrainte limite l'utilisation des Transformers sur des textes volumineux, nécessitant des ressources considérables en mémoire et en puissance de calcul.</p>
+
+<h3>Taille Maximale des Entrées</h3>
+
+<p>Malgré leurs performances impressionnantes, les modèles basés sur les Transformers présentent des limites importantes, notamment lorsqu'ils sont confrontés à des textes longs. La complexité quadratique du mécanisme de self-attention, qui croît exponentiellement avec la longueur de la séquence d'entrée, constitue un obstacle majeur. De plus, la capacité des modèles traditionnels comme BERT et GPT-2 est limitée à environ 512 <a href="https://veille-tokenizer.mohamed-bouchafaa.fr/state-of-art">tokens</a>, ce qui empêche une compréhension globale des documents volumineux tels que des rapports médicaux, des contrats juridiques ou des recherches académiques.</p>
+<h3>Limitations en Mémoire et Temps de Calcul</h3>
+
+<p>L'entraînement et l'inférence des Transformers classiques nécessitent des infrastructures coûteuses. Par exemple :
+
+<ul>
+
+<li><b>Coût en GPU</b> : La nécessité de multiples cartes graphiques pour entraîner un modèle avec un contexte plus large.</li>
+
+<li><b>Temps de calcul</b> : Même sur des architectures avancées, le temps requis pour traiter de longues séquences reste un frein à leur adoption généralisée.</li>
+
+</ul>
+</p>
+
+<h3>Difficulté à capturer le contexte global</h3>
+
+<p>Bien que les Transformers surpassent les RNN en capturant des relations longues distances, ils ne sont pas toujours optimisés pour maintenir une compréhension cohérente sur de très grands textes. Lorsque la séquence dépasse la fenêtre d’attention maximale, l’information devient fragmentée, réduisant l’efficacité du modèle. En effet, le cœur du Transformer repose sur le mécanisme d'attention complète. Cette opération a une complexité en temps et en mémoire de <i>O(n²)</i>, ce qui devient prohibitif quand <i>n</i> est grand (plusieurs milliers ou dizaines de milliers de tokens).</p>
+
+<p>Ces limitations ont conduit au développement de nouvelles architectures permettant de mieux gérer les longues séquences, que nous explorerons dans la prochaine section.
+</p>
+        
+        <h2>4. Les modèles et approches pour le traitement des longues séquences</h2>
+        <h3>BigBird</h3>
+        <p>BigBird est une version optimisée des Transformers introduite pour traiter efficacement de très longues séquences, là où les Transformers classiques atteignent rapidement leurs limites à cause de la complexité quadratique de leur mécanisme d’attention. L'article <a href="https://proceedings.neurips.cc/paper_files/paper/2020/file/c8512d142a2d849725f31a9a7a361ab9-Paper.pdf">"Big Bird: Transformers for Longer Sequences"</a> (Zaheer et al. en 2020) détaille la structure et les fondements théoriques de BigBird, en montrant qu’il peut approcher les performances des Transformers tout en étant bien plus économe en ressources pour les longues séquences.
+
+BigBird propose un mécanisme d'attention sparse (clairsemée), en remplaçant l'attention dense par une attention structurée, qui permet de garder une complexité linéaire <i>O(n)</i>, tout en assurant théoriquement que le modèle reste aussi expressif que le Transformer d’origine.
+
+La matrice d’attention de BigBird repose sur trois types de connexions :
+
+<ul>
+
+<li><b>Attention locale</b> : chaque token est relié à ses voisins proches, simulant un filtre convolutionnel.</li>
+<li><b>Attention globale</b> : certains tokens spécifiques (comme [CLS] ou des tokens "résumé") peuvent voir tous les autres tokens, et inversement.</li>
+<li><b>Attention aléatoire</b> : des liens aléatoires sont ajoutés entre tokens pour garantir que la connectivité globale soit préservée.</li>
+
+</ul>
+
+<figure style="text-align: center;">
+  <img src="bigbird.png" width="80%">
+  <figcaption><em>Figure :</em> Structure de l’attention sparse de BigBird, combinant attention globale, locale et aléatoire.</figcaption>
+</figure>
+
+
+
+
+<i>N.B. : Le modèle de Watts–Strogatz est un modèle de graphe qui génère des réseaux à la fois locaux et globalement connectés. BigBird s’inspire de cette topologie pour construire son masque d’attention sparse : en combinant attention locale, globale, et aléatoire, le graphe d’attention résultant présente les mêmes propriétés de connectivité qu’un graphe de Watts–Strogatz, ce qui garantit à la fois efficacité et couverture contextuelle dans la séquence.</i>
+
+
+<!-- Un aspect fondamental de BigBird est qu’il peut simuler un automate de Turing, ce qui garantit qu’il conserve la complétude de Turing du Transformer original. En outre, les auteurs montrent que cette version sparse est universellement approximative pour les fonctions de type attention, et que les propriétés de convergence de l’apprentissage sont similaires à celles du modèle dense.
+
+Les connexions aléatoires sont particulièrement cruciales pour garantir que le graph d’attention soit suffisamment connecté. En effet, BigBird s’inspire des théorèmes sur les graphes d’expansion et les matrices de projection Johnson-Lindenstrauss, montrant qu’un petit nombre de connexions aléatoires suffit à préserver la distance entre représentations dans des espaces de grande dimension. -->
+
+
+</p>
+
+<h3>Longformer</h3>
+        <p>
+
+Longformer est un autre modèle Transformer conçu pour gérer des séquences longues de manière efficace, en contournant la complexité quadratique du mécanisme d’attention standard, tout comme BigBird. Proposé dans l'article <a href="https://arxiv.org/pdf/2004.05150">"Longformer: The Long-Document Transformer"</a> (Beltagy et al.) en 2020, Longformer repose aussi sur une attention clairsemée (sparse), mais avec une approche différente, notamment à travers un mécanisme nommé "sliding window attention", combiné à une attention globale optionnelle.
+
+
+<figure style="text-align: center;">
+  <img src="longformer.png" width="80%">
+  <figcaption><em>Figure : </em>Schémas d’attention dans Longformer. De gauche à droite : attention complète <i>n<sup>2</sup></i>, attention par fenêtre glissante (sliding window), attention par fenêtre dilatée (dilated sliding window), et combinaison de fenêtres locales avec des positions globales (global + sliding window)</figcaption>
+</figure>
+
+À la différence de BigBird qui ajoute des connexions aléatoires pour préserver la connectivité globale du graphe d’attention, Longformer mise sur une structure fixe et déterministe. L’idée est de restreindre l’attention à un petit nombre de tokens autour de chaque position, tout en offrant la possibilité à certaines positions d’assumer un rôle "global", c’est-à-dire d’interagir avec tous les autres tokens.
+
+Formellement, on note toujours une séquence d'entrée <i>x=(x<sub>1</sub>,...,x<sub>n</sub>)</i>, et comme pour BigBird, on veut éviter de calculer l'intégralité de la matrice d'attention <i>n×n</i>. Longformer remplace cette attention dense par deux types :
+
+<ul>
+
+<li>Sliding Window Attention : chaque token <i>x<sub>i</sub></i> "prête attention" uniquement à un ou plusieurs tokens avant et après lui (fenêtre locale centrée).</li>
+<li>Global Attention : certains tokens désignés (par exemple, les tokens de question dans une tâche de QA) peuvent accéder à toute la séquence, et réciproquement.</li>
+
+</ul>
+
+</p>
+
+<h3>Reformer et autres approches</h3>
+        <p>
+
+Plusieurs modèles ont été proposés pour rendre les Transformers plus efficaces sur de longues séquences, en réduisant la complexité quadratique du mécanisme d’attention. Parmi eux, on trouve des approches comme Reformer, Linformer, Performer, ou Sparse Transformers, qui exploitent différentes stratégies : projection linéaire de l’attention, approximations basées sur des noyaux, attention locale ou structurée, ou encore techniques de hachage. Bien que les détails varient, tous partagent l’objectif commun d’abaisser la complexité à <i>O(n)</i> ou <i>O(nlog n)</i>, tout en conservant des performances comparables aux Transformers standards.
+
+Du côté des modèles récents comme GPT-4 Turbo ou Claude 2, la capacité à gérer des contextes très étendus (jusqu’à 128k tokens) repose probablement sur des variantes propriétaires de l’attention sparse ou hiérarchique, mais les détails techniques restent confidentiels. Une approche open source notable est Unlimiformer, qui introduit un mécanisme de mémoire "illimitée" en déléguant une partie des clés/valeurs de l’attention à une base vectorielle externe (comme FAISS). Cela permet de traiter de très longs contextes sans saturer la mémoire du modèle, en effectuant une recherche efficace pour ne retenir que les informations pertinentes à chaque étape.
+
+</p>
+
+        
+        <h2>5. Applications et impacts des Long-Context Models</h2>
+
+<p>
+
+Les modèles capables de traiter de longues séquences, comme Longformer ou BigBird, ont des applications concrètes dans de nombreux secteurs où l’information est dense, fragmentée ou distribuée sur de longs documents. Leur capacité à comprendre et synthétiser efficacement de tels contenus transforme en profondeur certains métiers.
+
+<h3>Santé</h3>
+Dans le domaine médical, ces modèles permettent l’analyse automatisée de dossiers patients volumineux, de rapports de radiologie, ou encore de comptes rendus opératoires. Selon ScienceDirect (2023) et DeepImaging23, l’utilisation de Transformers spécialisés (comme Med-BERT ou BioGPT) améliore l’interprétation de l’imagerie médicale, le diagnostic assisté par IA, et même la prédiction de risques cliniques.
+
+<h3>Droit</h3>
+Dans le secteur juridique, les LLMs long-contexte transforment le traitement des contrats volumineux, décisions jurisprudentielles et documents de procédure. Les cabinets utilisent ces outils pour faire de la revue contractuelle automatisée, assister à la rédaction d’actes, ou encore générer des résumés de décisions complexes (Village-Justice). Des plateformes comme MyLegitech vont jusqu’à parler de “contrats augmentés” grâce à l’IA générative. L’analyse de documents légaux étalés sur plusieurs centaines de pages devient ainsi plus rapide et plus fiable.
+
+<h3>Recherche scientifique</h3>
+Les modèles long-contexte s’avèrent cruciaux pour la synthèse automatique de vastes corpus académiques. Grâce à leur capacité à traiter simultanément de nombreux articles ou chapitres, ils facilitent la recherche documentaire, la cartographie de littérature ou encore la génération d’hypothèses de recherche. Des projets open source et académiques comme BioGPT, PubMedBERT ou Galactica s’appuient sur ces architectures pour assimiler des millions de publications scientifiques.
+
+<h3>Finance</h3>
+Dans la finance, les LLMs capables de gérer de longs contextes sont utilisés pour analyser des rapports annuels, évaluer des risques, générer des synthèses de marché, ou encore automatiser la conformité réglementaire. Ces modèles permettent aussi d’améliorer la détection de fraude ou la gestion des portefeuilles.
+
+<h3>Génération de résumés</h3>
+La synthèse automatique est l’un des usages les plus naturels des modèles capables de traiter de longs contextes. En ingérant plusieurs pages d’un document, ils peuvent produire des résumés cohérents, adaptés à un niveau de détail variable (résumé bref, résumé structuré, points clés). Des modèles comme BART, PEGASUS ou les variantes longue portée comme Longformer Encoder-Decoder (LED) ont été spécifiquement entraînés sur cette tâche.
+
+</p>
+           
+
+
+
+        </div>
+
+        <div id="article" class="tab-content">
+            <h1>Articles filtrés par thème</h1>
+            <div class="filter-buttons">
+                <button onclick="filterArticles('Tous')">Tous</button>
+                <button onclick="filterArticles('Médecine')">Médecine</button>
+                <button onclick="filterArticles('Droit')">Droit</button>
+                <button onclick="filterArticles('Finance')">Finance</button>
+                <button onclick="filterArticles('Génération de résumés')">Génération de résumés</button>
+                <button onclick="filterArticles('Maintenance prédictive')">Maintenance prédictive</button>
+                <button onclick="filterArticles('Papier scientifique')">Papiers scientifiques</button>
+            </div>
+            <div id="articles-list">
+<script>
+const articles =   [{
+    "titre": "La percée des Transformers dans le domaine de la santé",
+    "resume": "Les Transformers révolutionnent la médecine en analysant les données médicales (Med-BERT, BEHRT), segmentant les images IRM (TransUNet) et modélisant les protéines (AlphaFold2). GPT-3, utilisé en chatbots médicaux, pose des risques éthiques, nécessitant une régulation stricte pour éviter les erreurs médicales.",
+    "lien": "https://diplodoc.medium.com/la-perc%C3%A9e-des-transformeurs-transformers-dans-le-domaine-de-la-sant%C3%A9-8e8f2df8c82c",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Transformer la médecine grâce à la santé numérique",
+    "resume": "Sanofi ambitionne de devenir la première plateforme mondiale de soins numériques en intégrant IA, données et solutions digitales pour accélérer diagnostic et traitements. Elle optimise la fabrication industrielle, sécurise les données de santé et minimise les risques via une gouvernance stricte, garantissant éthique et régulation dans l’usage des technologies numériques.",
+    "lien": "https://www.codeofconduct.sanofi/fr/topics/transformer-la-medecine-grace-a-la-sante-numerique/",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Transformers pour la segmentation d’images médicales",
+    "resume": "Les Transformers améliorent la segmentation d’images médicales grâce à des modèles hybrides comme TransUNet, Swin-UNet et nnFormer, combinant CNN et self-attention. Leur objectif est de préciser la segmentation des organes et tissus en optimisant la précision des diagnostics, tout en affrontant les défis liés à l’éthique et la consommation mémoire.",
+    "lien": "https://thome.isir.upmc.fr/talks/DeepImaging23-Medical-Transformers.pdf",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Les Transformers en imagerie médicale",
+    "resume": "L’usage des Transformers en imagerie médicale s’étend à la classification, segmentation et détection des anomalies. Grâce à leur capacité à capter le contexte global, ils surpassent les CNN classiques dans l’analyse des images médicales, offrant une meilleure précision et automatisation des diagnostics dans les hôpitaux et laboratoires.",
+    "lien": "https://www.sciencedirect.com/science/article/pii/S1361841523000634",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Transformers pour usage médical",
+    "resume": "Les modèles Transformer trouvent des applications dans le diagnostic assisté, l’analyse de pathologies et l’optimisation des traitements. Ils permettent aux médecins d’obtenir des analyses détaillées et rapides, facilitant ainsi la prise de décisions médicales. Cependant, leur adoption clinique nécessite des régulations strictes pour garantir la sécurité et la fiabilité des diagnostics IA.",
+    "lien": "https://www.torytrans.com/en/products/transformers/medical-use",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Transformers et intelligence artificielle en médecine",
+    "resume": "Les Transformers révolutionnent la médecine en automatisant l’analyse des données médicales, optimisant les diagnostics et améliorant la recherche clinique. Utilisés en imagerie médicale, classification de maladies et génération de rapports, ils augmentent la précision des soins, bien que leur adoption nécessite une réglementation stricte pour éviter les erreurs critiques.",
+    "lien": "https://www.sciencedirect.com/science/article/pii/S1361841523000233",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Les modèles Transformers et la médecine",
+    "resume": "Les Transformers permettent une meilleure détection des pathologies grâce à leur capacité à traiter des données massives. Utilisés en génomique, radiologie et surveillance épidémiologique, ils facilitent l’analyse rapide des signaux médicaux. Cependant, leur impact clinique dépend d’une intégration éthique et sécurisée dans les systèmes de santé.",
+    "lien": "https://arxiv.org/abs/2202.12165",
+    "categorie": "Médecine"
+  },
+  {
+    "titre": "Les Transformers et l’intelligence artificielle dans le droit",
+    "resume": "L’IA juridique, grâce aux Transformers, révolutionne la rédaction de contrats, l’analyse des décisions judiciaires et la recherche documentaire. Les modèles comme GPT-4 et BigBird automatisent les tâches répétitives et offrent des résumés précis, mais nécessitent une vérification humaine pour éviter les biais et garantir la fiabilité des résultats.",
+    "lien": "https://dassignies.law/blog/les-transformers",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "Les LLMs et leur impact sur le droit",
+    "resume": "Les Large Language Models (LLMs) facilitent l’analyse des textes juridiques, la rédaction de conclusions et la gestion des litiges. Utilisés dans les cabinets d’avocats et par les juges, ils accélèrent la recherche juridique, mais soulèvent des questions éthiques sur l’interprétation des textes et la transparence des décisions.",
+    "lien": "https://eleven-strategy.fr/comment-les-llm-peuvent-transformer-votre-activite-les-impacts-les-challenges-et-les-cas-dusage/",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "L’IA générative pour les professionnels du droit",
+    "resume": "L’IA générative, via les Transformers, assiste les juristes dans la rédaction automatique de contrats, la conformité réglementaire et la veille juridique. En réduisant le temps d’analyse, ces modèles améliorent l’efficacité des cabinets d’avocats, tout en nécessitant des mesures de contrôle pour éviter les erreurs et les manipulations juridiques.",
+    "lien": "https://www.lexisnexis.com/community/fr-ressources/b/podcasts/posts/ia-generative-professionnels-droit-episode-2",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "L'intelligence artificielle dans le droit : révolution ou défi ?",
+    "resume": "Les Transformers transforment le secteur juridique en automatisant l’analyse des textes législatifs et en accélérant la rédaction de contrats. Cependant, leur adoption pose des défis éthiques et réglementaires, notamment en matière de transparence des décisions et de biais algorithmiques dans l’interprétation des lois.",
+    "lien": "https://www.village-justice.com/articles/intelligence-artificielle-dans-droit-revolution-defi-pour-les-cabinets-avocats,49936.html",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "L'intelligence artificielle et le droit au Sénat",
+    "resume": "Les LLMs sont au centre des discussions législatives sur leur impact sur le droit. Le Sénat examine les implications de l’IA sur la justice prédictive, la confidentialité des données et l’équité juridique. L’objectif est d’établir un cadre réglementaire garantissant l’usage éthique et sécurisé des modèles IA en droit.",
+    "lien": "https://www.senat.fr/rap/r24-216/r24-21614.html",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "L’IA et la gestion des contrats dans le droit",
+    "resume": "Les Transformers optimisent la gestion contractuelle en automatisant l’analyse des risques, la rédaction et la révision des clauses. Cette technologie réduit les délais juridiques et améliore la conformité, mais nécessite une supervision humaine rigoureuse pour éviter des erreurs qui pourraient compromettre la validité des contrats légaux.",
+    "lien": "https://mylegitech.com/blog/ia-generative-et-management-des-contrats-vers-un-contrat-augmente-4eme-partie-2/",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "L’intelligence artificielle et la transformation du droit",
+    "resume": "L’IA générative transforme les métiers du droit en améliorant la recherche documentaire et l’analyse des décisions judiciaires. Les avocats et magistrats utilisent ces outils pour gagner en productivité, mais restent confrontés aux défis éthiques, notamment en matière de confidentialité des données et d’objectivité des analyses.",
+    "lien": "https://juridy.com/lintelligence-artificielle-droit/",
+    "categorie": "Droit"
+  },
+  {
+    "titre": "L’impact des LLMs dans le secteur bancaire et financier",
+    "resume": "Les LLMs révolutionnent la finance en automatisant la détection des fraudes, l’analyse des risques et la gestion des investissements. Grâce à l’analyse prédictive, ces modèles optimisent la prise de décision, mais leur implémentation requiert une réglementation stricte pour éviter les manipulations de marché et les erreurs algorithmiques.",
+    "lien": "https://fr.shaip.com/blog/llm-in-banking-and-finance/",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "Les Transformers dans la finance et la banque",
+    "resume": "Les Transformers améliorent l’évaluation des risques, l’optimisation des portefeuilles et la gestion des transactions bancaires. Utilisés pour la prédiction des marchés et la détection de fraudes, ils offrent une automatisation avancée, mais nécessitent une régulation stricte pour éviter les biais et risques financiers.",
+    "lien": "https://meritis.fr/les-transformers-le-modele-derriere-la-puissance-de-chatgpt/",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "IA générative et finance : transformation technologique et humaine",
+    "resume": "L’IA générative, appliquée à la finance, optimise la conformité réglementaire, la gestion des risques et l'automatisation des services clients. Les LLMs permettent d’analyser des volumes massifs de données financières, mais posent des défis éthiques et sécuritaires quant à la prise de décisions autonomes dans les investissements.",
+    "lien": "https://www.groupeonepoint.com/fr/publications/finance-et-ia-generative-transformation-technologique-et-humaine/",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "L’impact de ChatGPT sur la finance",
+    "resume": "ChatGPT et les LLMs révolutionnent les conseils financiers et la gestion des relations clients en automatisant les réponses et en assistant les analystes. Bien qu’ils facilitent l’analyse rapide des tendances financières, leur fiabilité reste sujette à la validation humaine pour éviter les erreurs et les biais algorithmiques.",
+    "lien": "https://blog.ibanfirst.com/fr/chatgpt-pour-finance",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "L’IA et les banques : vers une nouvelle ère financière",
+    "resume": "Les banques adoptent l’IA générative pour l’automatisation des transactions, l’évaluation des crédits et la personnalisation des services clients. Les Transformers facilitent une analyse approfondie des risques, mais leur intégration doit garantir une transparence accrue et un cadre éthique respectant la régulation financière.",
+    "lien": "https://mondetech.fr/jpmorgan-revolutionne-le-secteur-financier-avec-sa-suite-ia-llm/",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "Les chatbots IA et la finance",
+    "resume": "Les chatbots basés sur Transformers révolutionnent la relation client dans la finance en fournissant des réponses automatisées et des conseils personnalisés. Leur efficacité réduit les coûts opérationnels, mais nécessite une supervision humaine pour éviter des erreurs dans les recommandations financières et garantir la conformité réglementaire.",
+    "lien": "https://botpress.com/fr/industries/finance",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "Comment les banques utilisent les LLMs",
+    "resume": "Les LLMs transforment la banque en automatisant la détection des fraudes, l’évaluation des risques et la gestion des crédits. Leur capacité à analyser rapidement des volumes massifs de données optimise la conformité réglementaire, mais leur implémentation exige une transparence accrue et une supervision pour éviter les biais algorithmiques.",
+    "lien": "https://www.investglass.com/fr/how-are-banks-using-llms-enhancing-fraud-detection-risk-assessment-and-credit-evaluation/",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "L’intelligence artificielle dans la finance",
+    "resume": "L’IA révolutionne la gestion des investissements, le trading automatisé et la gestion des risques financiers. Grâce aux Transformers, les institutions financières gagnent en rapidité et précision dans leurs décisions. Cependant, la régulation des IA financières devient essentielle pour garantir leur éthique et éviter la manipulation des marchés.",
+    "lien": "https://www.intel.fr/content/www/fr/fr/learn/ai-in-finance.html",
+    "categorie": "Finance"
+  },
+  {
+    "titre": "L’impact des LLMs sur la génération de résumés",
+    "resume": "Les LLMs facilitent la synthèse automatique des documents en réduisant le temps de lecture et d’analyse. Utilisés dans la recherche académique, les entreprises et la finance, ils permettent d’extraire rapidement les informations clés, bien que la vérification humaine reste nécessaire pour éviter les erreurs d’interprétation.",
+    "lien": "https://datacorner.fr/llm-bart-summary/",
+    "categorie": "Génération de résumés"
+  },
+  {
+    "titre": "Les Transformers et la génération automatique de texte",
+    "resume": "Les modèles Transformers améliorent la génération de résumés intelligents, permettant d’automatiser la rédaction d’articles et de rapports. Utilisés dans les médias, la finance et la recherche, ces modèles posent la question de la fiabilité des sources et de la qualité des résumés générés par l’IA.",
+    "lien": "https://meritis.fr/les-transformers-le-modele-derriere-la-puissance-de-chatgpt/",
+    "categorie": "Génération de résumés"
+  },
+  {
+    "titre": "Les LLMs pour résumer l'information",
+    "resume": "Les LLMs sont utilisés pour analyser et condenser rapidement de grandes quantités de texte dans des secteurs comme la médecine, la finance et le droit. Bien qu’ils réduisent le temps de recherche, leur efficacité dépend de l’entraînement du modèle et des biais présents dans les données utilisées.",
+    "lien": "https://datascientest.com/large-language-models-tout-savoir",
+    "categorie": "Génération de résumés"
+  },
+  {
+    "titre": "LangChain et la transformation des données",
+    "resume": "LangChain utilise les LLMs pour transformer les données en connaissances exploitables, facilitant l’automatisation des analyses et la génération d’insights stratégiques. Son application s’étend aux chatbots, systèmes de recommandation et analyse de texte, bien que la gestion des biais et la transparence des résultats restent des défis.",
+    "lien": "https://creative-ai.studio/blog/2024/09/21/langchain-et-llm-transformer-les-donnees-en-connaissances-exploitables/",
+    "categorie": "Génération de résumés"
+  },
+  {
+    "titre": "Les LLMs et la maintenance prédictive industrielle",
+    "resume": "Les Transformers optimisent la maintenance industrielle en analysant des flux de données en temps réel pour anticiper les défaillances des machines. Leur capacité à prédire les pannes et réduire les coûts de maintenance transforme l’industrie, mais nécessite une intégration efficace avec les infrastructures existantes.",
+    "lien": "https://blog.integral-system.fr/ia-generative-une-revolution-pour-le-secteur-industriel/",
+    "categorie": "Maintenance prédictive"
+  },
+  {
+    "titre": "L’intelligence artificielle et la maintenance préventive",
+    "resume": "L’IA générative révolutionne la maintenance préventive en permettant d’identifier les anomalies avant qu’elles ne causent des pannes majeures. Les LLMs analysent les historiques de maintenance et les données IoT, optimisant ainsi les opérations industrielles. Toutefois, leur adoption dépend de la qualité des données et des modèles prédictifs.",
+    "lien": "https://www.carl-software.fr/cmms-ia-intelligence-artificielle-gmao-maintenance-preventive-predictive/",
+    "categorie": "Maintenance prédictive"
+  },
+  {
+    "titre": "Efficient Transformers: A Survey",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://proceedings.neurips.cc/paper/2020/hash/c8512d142a2d849725f31a9a7a361ab9-Abstract.html",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Attention Is All You Need",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://proceedings.neurips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "GPT Understands, Too",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://arxiv.org/abs/2201.11838",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "A Survey on Large Language Models",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://arxiv.org/abs/2211.00974",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Reformer: The Efficient Transformer",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://arxiv.org/abs/2004.05150",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Longformer: The Long-Document Transformer",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://aclanthology.org/2021.eacl-main.154/",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Transformer-Based Model for Text Summarization",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://ieeexplore.ieee.org/abstract/document/9441516/",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Sparse Attention Mechanisms in Transformers",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://arxiv.org/abs/2203.08913",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Advances in Transformer Architectures",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://proceedings.neurips.cc/paper_files/paper/2023/hash/6f9806a5adc72b5b834b27e4c7c0df9b-Abstract-Conference.html",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Scaling Laws for Neural Language Models",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://arxiv.org/abs/2310.13800",
+    "categorie": "Papier scientifique"
+  },
+  {
+    "titre": "Understanding Memory Usage in Large Transformer Models",
+    "resume": "Résumé disponible dans le lien",
+    "lien": "https://arxiv.org/abs/2309.16039",
+    "categorie": "Papier scientifique"
+  }];
+
+const container = document.currentScript.parentElement;
+articles.forEach(article => {
+  const div = document.createElement('div');
+  div.className = 'article';
+  div.setAttribute('data-categorie', article.categorie);
+  div.innerHTML = `<h3><a href="${article.lien}" target="_blank">${article.titre}</a></h3><p>${article.resume}</p>`;
+  container.appendChild(div);
+});
+</script>
+</div>
+        </div>
+
+        <div id="metho" class="tab-content">
+            
+
+<h1>Méthodologie de veille</h1>
+
+<p>La stratégie de veille repose sur l’exploitation croisée de sources variées et d’outils spécialisés permettant de suivre les évolutions rapides du domaine des Transformers et des LLMs.</p>
+
+<h2>Sources utilisées</h2>
+<ul>
+  <li><strong>Papiers scientifiques</strong> : Google Scholar (arXiv, NeurIPS, etc.) et Scopus pour suivre les publications les plus récentes et pertinentes.</li>
+  <li><strong>Blogs spécialisés</strong> : Hugging Face Blog pour les synthèses d’experts.</li>
+</ul>
+
+<h2>Outils de veille automatisée</h2>
+<ul>
+  <li><strong>Scrapers et alertes</strong> : automatisation via Google Scholar Alerts, scripts personnalisés pour détecter de nouvelles publications.</li>
+  <li><strong>Résumé automatique</strong> : usage de LLMs pour résumer les articles les plus récents et extraire les points clés.</li>
+  <li><strong>Aggrégateur de contenu</strong> : Zotero pour lire les flux RSS.</li>
+</ul>
+
+        </div>
+    </div>
+</body>
+</html>
